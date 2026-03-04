@@ -150,11 +150,19 @@ export function useRelationshipsService(relationships: Relationship[]): Relation
       }),
     );
 
+    // Constrain color interpolation to a range that ensures sufficient contrast
+    // with dark text. The range [0.2, 0.55] avoids both too-light and too-dark
+    // colors from D3 sequential schemes.
+    const COLOR_MIN = 0.2;
+    const COLOR_MAX = 0.55;
+
     const calculateColor = (colorSet: (n: number) => string, valueSet: string[], value: string) => {
       if (valueSet.indexOf(value) < 0) {
         return undefined;
       }
-      return colorSet(1 - valueSet.indexOf(value) / 9);
+      const t = 1 - valueSet.indexOf(value) / 9;
+      // Map t from [0, 1] to [COLOR_MIN, COLOR_MAX]
+      return colorSet(COLOR_MIN + t * (COLOR_MAX - COLOR_MIN));
     };
 
     const possibleObjectTypes = [...resourceTypes, ...subjectTypes];
@@ -199,7 +207,7 @@ export function useRelationshipsService(relationships: Relationship[]): Relation
         if (!scheme) {
           return undefined;
         }
-        return scheme(0.65);
+        return scheme(0.45);
       },
     };
   }, [relationships]);
